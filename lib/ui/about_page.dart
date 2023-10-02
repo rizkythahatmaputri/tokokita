@@ -12,7 +12,7 @@ class AboutPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('Ini adalah project flutter milik:'),
-          Text('Rizkytha Hatma'),
+          Text('Rizkytha Hatma Putri'),
           Text('H1D021044'),
         ],
       )),
