@@ -1,5 +1,7 @@
 # tokokita
 
+Kak, screenshot aplikasi di folder lib>screenshot
+
 A new Flutter project.
 
 ## Getting Started
