@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tokokita/model/registrasi.dart';
+import 'package:tokokita/bloc/login_bloc.dart';
+import 'package:tokokita/helpers/user_info.dart';
+import 'package:tokokita/ui/produk_page.dart';
 import 'package:tokokita/ui/registrasi_page.dart';
-import 'package:tokokita/ui/registrasi_page.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -36,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(
                   height: 30,
                 ),
-                _menuRegistrasi()
+                _menuRegistrasi(),
               ],
             ),
           ),
@@ -75,21 +77,45 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buttonLogin() {
-    return Padding(
-      padding:
-          const EdgeInsets.only(top:8.0), // Tambahkan padding di atas tombol
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(
-              horizontal: 16.0, vertical: 10.0), // Atur padding tombol
-          textStyle: TextStyle(fontSize: 15.0), // Atur ukuran teks tombol
-        ),
-        child: const Text("Login"),
-        onPressed: () {
-          var validate = _formKey.currentState!.validate();
-        },
-      ),
+    return ElevatedButton(
+      child: const Text("Login"),
+      onPressed: () {
+        var validate = _formKey.currentState!.validate();
+        if (validate) {
+          if (!_isLoading) _submit();
+        }
+      },
     );
+  }
+
+  void _submit() {
+    _formKey.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
+    LoginBloc.login(
+      email: _emailTextboxController.text,
+      password: _passwordTextboxController.text,
+    ).then((value) async {
+      await UserInfo().setToken(value.token.toString());
+      await UserInfo().setUserID(int.parse(value.userID.toString()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ProdukPage()),
+      );
+    }, onError: (error) {
+      print(error);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => const WarningDialog(
+          description: "Login gagal, silahkan coba lagi",
+        ),
+      );
+    });
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Widget _menuRegistrasi() {

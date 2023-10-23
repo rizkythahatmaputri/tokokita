@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tokokita/bloc/product_bloc.dart';
+import 'package:tokokita/bloc/product_bloc.dart';
 import 'package:tokokita/model/produk.dart';
 import 'package:tokokita/ui/produk_form.dart';
+import 'package:tokokita/ui/produk_page.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
 
 class ProdukDetail extends StatefulWidget {
   Produk? produk;
@@ -16,7 +20,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detail Produk'),
+        title: const Text('Detail Produk '),
       ),
       body: Center(
         child: Column(
@@ -40,56 +44,62 @@ class _ProdukDetailState extends State<ProdukDetail> {
     );
   }
 
-Widget _tombolHapusEdit() {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      // Tombol Edit
-      OutlinedButton(
-        child: const Text("EDIT"),
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.green), // Warna hijau
-          foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // Warna teks putih
-        ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProdukForm(
-                produk: widget.produk!,
+  Widget _tombolHapusEdit() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        OutlinedButton(
+          child: const Text("EDIT"),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProdukForm(
+                  produk: widget.produk!,
+                ),
               ),
-            ),
-          );
-        },
-      ),
-      // Tombol Hapus
-      OutlinedButton(
-        child: const Text("DELETE"),
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.red), // Warna merah
-          foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // Warna teks putih
+            );
+          },
         ),
-        onPressed: () => confirmHapus(),
-      ),
-    ],
-  );
-}
-
+        OutlinedButton(
+          child: const Text("DELETE"),
+          onPressed: () => confirmHapus(),
+        ),
+      ],
+    );
+  }
 
   void confirmHapus() {
     AlertDialog alertDialog = AlertDialog(
       content: const Text("Yakin ingin menghapus data ini?"),
       actions: [
-        //tombol hapus
+        // Tombol hapus
         OutlinedButton(
-          child: const Text("Ya"),
-          onPressed: () {},
+          child: const Text("YA"),
+          onPressed: () {
+            ProdukBloc.deleteProduk(widget.produk!.id).then((value) {
+              if (value) {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const ProdukPage(),
+                ));
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (context) => const WarningDialog(
+                    description: "Gagal menghapus data. Silakan dicoba lagi.",
+                  ),
+                );
+              }
+            }).catchError((error) {});
+
+            Navigator.pop(context);
+          },
         ),
-        //tombol batal
+        // Tombol batal
         OutlinedButton(
           child: const Text("Batal"),
           onPressed: () => Navigator.pop(context),
-        )
+        ),
       ],
     );
 
